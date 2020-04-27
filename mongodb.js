@@ -59,14 +59,22 @@ MongoClient.connect(connectionURL, {useNewUrlParser: true}, (error, client) => {
     //     console.log(tasks.map((task) => task.description).join('\n'));
     // });
 
-    db.collection('tasks').updateMany({completed: false}, 
-        {
-            $set: {
-                completed: true
-            }
-        }).then((result) =>{
-            console.log('Tasks completed.', result);
-        }).catch((error) => {
-            console.log('Failed on updating tasks.', error);
-        });
+    // db.collection('tasks').updateMany({completed: false}, {
+    //     $set: {
+    //         completed: true
+    //     }
+    // }).then((result) =>{
+    //     console.log('Tasks completed.', result);
+    // }).catch((error) => {
+    //     console.log('Failed on updating tasks.', error);
+    // });
+
+    
+    db.collection('tasks').deleteOne({description: 
+        'Finish Node.js course'
+    }).then((result) =>{
+        console.log('Task deleted.', result);
+    }).catch((error) => {
+        console.log('Failed on deleting task.', error);
+    });
 });
