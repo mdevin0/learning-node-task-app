@@ -46,16 +46,27 @@ MongoClient.connect(connectionURL, {useNewUrlParser: true}, (error, client) => {
     //     console.log("Tasks inserted successfully.", result.ops);
     // });
 
-    db.collection('tasks').findOne({_id: ObjectID('5ea6f0a63c95492bb8ab438d')}, (error, task) => {
-        if(error){
-            return console.log(console.error);
-        }
+    // db.collection('tasks').findOne({_id: ObjectID('5ea6f0a63c95492bb8ab438d')}, (error, task) => {
+    //     if(error){
+    //         return console.log(console.error);
+    //     }
 
-        console.log("Task found:", task);
-    });
+    //     console.log("Task found:", task);
+    // });
 
-    db.collection('tasks').find({completed: false}).toArray((error, tasks) => {
-        console.log(`${tasks.length} unfinished tasks found:`);
-        console.log(tasks.map((task) => task.description).join('\n'));
-    });
+    // db.collection('tasks').find({completed: false}).toArray((error, tasks) => {
+    //     console.log(`${tasks.length} unfinished tasks found:`);
+    //     console.log(tasks.map((task) => task.description).join('\n'));
+    // });
+
+    db.collection('tasks').updateMany({completed: false}, 
+        {
+            $set: {
+                completed: true
+            }
+        }).then((result) =>{
+            console.log('Tasks completed.', result);
+        }).catch((error) => {
+            console.log('Failed on updating tasks.', error);
+        });
 });
