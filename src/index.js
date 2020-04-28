@@ -3,6 +3,7 @@ const express = require('express');
 require('./db/mongoose'); // this is loading the database connection
 const User = require('./model/user');
 const Task = require('./model/task');
+const utils = require('./utils');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,30 @@ app.get('/user/:id', async (req, res) => {
     }
 });
 
+// update user
+app.patch('/user/:id', async (req, res) => {
+    const fieldsToUpdate = Object.keys(req.body);
+    const invalidFields = utils.getInvalidFields(fieldsToUpdate, User);
+
+    if(invalidFields.length > 0){
+        res.status(400).send({error: 'Invalid fields.', fields: invalidFields})
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        if(!user){
+            return res.status(404).send({error: "User not found.", user: req.params.id});
+        }
+        res.send(user);
+
+    } catch(e) {
+        res.status(400).send(e);
+    }
+});
+
 // create task
 app.post('/task', async (req, res) => {
     const task = new Task(req.body);
@@ -88,6 +113,31 @@ app.get('/task/:id', async (req, res) => {
         res.send(task);
     } catch(e){
         res.status(500).send(e);
+    }
+});
+
+
+// update Task
+app.patch('/task/:id', async (req, res) => {
+    const fieldsToUpdate = Object.keys(req.body);
+    const invalidFields = utils.getInvalidFields(fieldsToUpdate, Task);
+
+    if(invalidFields.length > 0){
+        res.status(400).send({error: 'Invalid fields.', fields: invalidFields})
+    }
+
+    try {
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        if(!task){
+            return res.status(404).send({error: "Task not found.", task: req.params.id});
+        }
+        res.send(task);
+
+    } catch(e) {
+        res.status(400).send(e);
     }
 });
 
