@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
-const User = mongoose.model('User', {
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -44,5 +45,20 @@ const User = mongoose.model('User', {
         }
     }
 });
+
+/*
+    This is is a so-called MonboDB middleware. It runs before create/update events.
+    You cannot user Mongoose's findByIdAndUpdate() method as it bypasses MongoDB
+    middlewares.
+*/
+userSchema.pre('save', async function(next) {
+    const user = this;
+    if(user.isModified('password')){
+        user.password = await bcrypt.hash(user.password, parseInt(process.env.BCRYPT_ROUNDS));
+    }
+    next(); // gotta call next to finish the function execution, or hang forever
+});
+
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

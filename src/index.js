@@ -1,3 +1,7 @@
+const utils = require('./utils');
+utils.validateEnvironmentVariables();
+
+
 const express = require('express');
 
 require('./db/mongoose'); // this is loading the database connection

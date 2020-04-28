@@ -12,7 +12,20 @@ const getProperties = (model) => {
 
 }
 
+const validateEnvironmentVariables = () => {
+    const requiredVars = ['BCRYPT_ROUNDS'];
+    const envVars = Object.keys(process.env);
+    const missingVars = requiredVars.filter((requiredVar) => !envVars.includes(requiredVar));
+    if(missingVars.length > 0){
+        console.error(`The application cannot start if the missing required variables are not set: ${missingVars.join(' ')}`);
+        console.error('Shutting the server down...')
+        process.exit(666);
+    }
+
+}
+
 module.exports = {
     getInvalidFields,
-    getProperties
+    getProperties,
+    validateEnvironmentVariables
 };
