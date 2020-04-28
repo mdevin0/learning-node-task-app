@@ -11,11 +11,51 @@ router.post('/user', async (req, res) => {
     const user = new User(req.body);
     try {
         // TODO - should return status 500 if there's an error on connecting with the database
-        await user.save();
         const token = await user.generateAuthToken();
         res.status(201).send({user, token});
     } catch(e) {
-        res.status(400).send(e);
+        console.error(e);
+        res.status(400).send({error: 'Failed to create user.'});
+    }
+});
+
+// user login
+router.post('/user/login', async (req, res) => {
+    try {
+        const {email, password} = req.body;
+        const user = await User.findByCredentials(email, password);
+        const token = await user.generateAuthToken();
+        res.send({user, token});
+    } catch(e){
+        console.error(e);
+        res.status(400).send({error: 'Unable to login.'});
+    }
+
+});
+
+// user logout
+router.post('/user/logout', auth, async (req, res) => {
+    try{
+        const{user} = req;
+        user.tokens = user.tokens.filter((token) => token !== req.token);
+        await user.save();
+        res.send({message: 'Logout successful.'});
+    } catch(e){
+        console.error(e);
+        res.status(400).send();
+    }
+});
+
+// user logout from sessions
+router.post('/user/logoutAll', auth, async (req, res) => {
+    try{
+        const{user} = req;
+        user.tokens = [];
+        await user.save();
+        res.send({message: 'Logout successful.'});
+    } catch(e){
+        console.error(e);
+        res.status(400).send()
     }
 });
 
@@ -35,7 +75,8 @@ router.get('/user/:id', auth, async (req, res) => {
         }
         res.send(user);
     } catch(e){
-        res.status(500).send(e);
+        console.error(e);
+        res.status(500).send({error: 'Internal server error.'});
     }
 });
 
@@ -59,6 +100,7 @@ router.patch('/user/:id', auth, async (req, res) => {
         res.send(user);
 
     } catch(e) {
+        console.error(e);
         res.status(400).send(e);
     }
 });
@@ -74,21 +116,10 @@ router.delete('/user/:id', auth, async (req, res) => {
         }
         res.send(user);
     } catch(e){
-        res.status(500).send(e);
+        console.error(e);
+        res.status(500).send({error: "Error deleting user."});
     }
 });
 
-// user login
-router.post('/user/login', async (req, res) => {
-    try {
-        const {email, password} = req.body;
-        const user = await User.findByCredentials(email, password);
-        const token = await user.generateAuthToken();
-        res.send({user, token});
-    } catch(e){
-        res.status(400).send(e);
-    }
-
-});
 
 module.exports = router;

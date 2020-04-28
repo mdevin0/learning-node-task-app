@@ -13,6 +13,7 @@ router.post('/task', async (req, res) => {
         await task.save();
         res.status(201).send(task);
     } catch(e){
+        console.error(e);
         res.status(400).send(e);
     }
 });
@@ -27,6 +28,7 @@ router.get('/task/', async (req, res) => {
         }
         res.send(tasks);
     } catch(e){
+        console.error(e);
         res.status(500).send(e);
     }
 });
@@ -41,7 +43,8 @@ router.get('/task/:id', async (req, res) => {
         }
         res.send(task);
     } catch(e){
-        res.status(500).send(e);
+        console.error(e);
+        res.status(500).send({error: 'Internal server error.'});
     }
 });
 
@@ -66,6 +69,7 @@ router.patch('/task/:id', async (req, res) => {
         res.send(task);
 
     } catch(e) {
+        console.error(e);
         res.status(400).send(e);
     }
 });
@@ -81,7 +85,8 @@ router.delete('/task/:id', async (req, res) => {
         }
         res.send(task);
     } catch(e){
-        res.status(500).send(e);
+        console.error(e);
+        res.status(500).send({error: 'Error deleting task.'});
     }
 });
 
