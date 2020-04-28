@@ -11,76 +11,84 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // create user
-app.post('/user', (req, res) => {
+app.post('/user', async (req, res) => {
     const user = new User(req.body);
-    user.save().then(() => {
+    try {
+        // TODO - should return status 500 if there's an error on connecting with the database
+        await user.save();
         res.status(201).send(user);
-    }).catch((error) => {
-        res.status(400).send(error);
-    });
+    } catch(e) {
+        res.status(400).send(e);
+    }
 });
 
 // list users
-app.get('/user/', (req, res) => {
-    const{id} = req.params;
-    User.find({}).then((users) => {
+app.get('/user/', async (req, res) => {
+    try {
+        const users = await User.find({});
         if(!users){
-            return res.status(404).send({error:`User not found`});
+            return res.status(404).send({error: 'No users found.'});
         }
         res.send(users);
-    }).then((error) => {
-        res.status(500).send(error);
-    })
+
+    } catch(e) {
+        res.status(500).send(e);
+    }
 });
 
 // list specific user
-app.get('/user/:id', (req, res) => {
+app.get('/user/:id', async (req, res) => {
     const{id} = req.params;
-    User.findById(id).then((user) => {
+
+    try{
+        const user = await User.findById(id);
         if(!user){
-            return res.status(404).send({error:`User not found`, id});
+            return res.status(404).send({error: 'User not found.', id});
         }
         res.send(user);
-    }).then((error) => {
-        res.status(500).send(error);
-    })
+    } catch(e){
+        res.status(500).send(e);
+    }
 });
 
 // create task
-app.post('/task', (req, res) => {
+app.post('/task', async (req, res) => {
     const task = new Task(req.body);
-    task.save().then(() => {
+    try{
+        // TODO - should return status 500 if there's an error on connecting with the database
+        await task.save();
         res.status(201).send(task);
-    }).catch((error) => {
-        res.status(400).send(error);
-    });
+    } catch(e){
+        res.status(400).send(e);
+    }
 });
 
 
-// list users
-app.get('/task/', (req, res) => {
-    const{id} = req.params;
-    Task.find({}).then((tasks) => {
+// list tasks
+app.get('/task/', async (req, res) => {
+    try{
+    const tasks = await Task.find({});
         if(!tasks){
-            return res.status(404).send({error:`Task not found`});
+            return res.status(404).send({error:'No tasks found'});
         }
         res.send(tasks);
-    }).then((error) => {
-        res.status(500).send(error);
-    })
+    } catch(e){
+        res.status(500).send(e);
+    }
 });
 
-// list specific user
-app.get('/task/:id', (req, res) => {
+// list specific task
+app.get('/task/:id', async (req, res) => {
     const{id} = req.params;
-    Task.findById(id).then((task) => {
+    try{
+        const task = await Task.findById(id);
         if(!task){
-            return res.status(404).send({error:`Task not found`, id});
+            return res.status(404).send({error: 'Task not found', id});
         }
         res.send(task);
-    }).then((error) => {
-        res.status(500).send(error);
-    })
+    } catch(e){
+        res.status(500).send(e);
+    }
 });
 
 app.listen(PORT, () => {
