@@ -64,24 +64,8 @@ router.get('/user/me', auth, async (req, res) => {
     res.send(req.user);
 });
 
-// list specific user
-router.get('/user/:id', auth, async (req, res) => {
-    const{id} = req.params;
-
-    try{
-        const user = await User.findById(id);
-        if(!user){
-            return res.status(404).send({error: 'User not found.', id});
-        }
-        res.send(user);
-    } catch(e){
-        console.error(e);
-        res.status(500).send({error: 'Internal server error.'});
-    }
-});
-
 // update user
-router.patch('/user/:id', auth, async (req, res) => {
+router.patch('/user/me', auth, async (req, res) => {
     const fieldsToUpdate = Object.keys(req.body);
     const invalidFields = utils.getInvalidFields(fieldsToUpdate, User);
 
@@ -90,13 +74,9 @@ router.patch('/user/:id', auth, async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.params.id);
+        const {user} = req;
         fieldsToUpdate.forEach((field) => user[field] = req.body[field]);
         await user.save();
-
-        if(!user){
-            return res.status(404).send({error: "User not found.", user: req.params.id});
-        }
         res.send(user);
 
     } catch(e) {
@@ -106,15 +86,11 @@ router.patch('/user/:id', auth, async (req, res) => {
 });
 
 // delete user
-router.delete('/user/:id', auth, async (req, res) => {
-    const {id} = req.params;
+router.delete('/user/me', auth, async (req, res) => {
 
     try {
-        const user = await User.findByIdAndDelete(id);
-        if(!user){
-            return res.status(404).send({error: 'User not found.'});
-        }
-        res.send(user);
+        await User.findByIdAndDelete(req.user.id);
+        res.send(req.user);
     } catch(e){
         console.error(e);
         res.status(500).send({error: "Error deleting user."});

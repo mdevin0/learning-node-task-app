@@ -60,6 +60,7 @@ const userSchema = new mongoose.Schema({
 });
 
 
+
 userSchema.methods.toJSON = function(){
     const user = this;
     const userData = user.toObject();
