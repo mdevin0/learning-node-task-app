@@ -67,7 +67,7 @@ app.post('/task', async (req, res) => {
 // list tasks
 app.get('/task/', async (req, res) => {
     try{
-    const tasks = await Task.find({});
+        const tasks = await Task.find({});
         if(!tasks){
             return res.status(404).send({error:'No tasks found'});
         }
