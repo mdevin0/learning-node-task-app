@@ -7,7 +7,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        maxlength: 50
+        maxlength: 50,
+        validate(value){
+            if(validator.isAlphanumeric(value)){
+               throw new Error("User name can only contain letters and numbers");
+            }
+        }
 
     },
     password: {
@@ -26,6 +31,7 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        unique: true,
         trim: true,
         lowercase: true,
         maxlength: 50,
@@ -45,6 +51,20 @@ const userSchema = new mongoose.Schema({
         }
     }
 });
+
+
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email });
+    if(!user)
+        throw new Error('Invalid credentials.');
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch){
+        throw new Error('Invalid credentials.');
+    }
+
+    return user;
+};
 
 /*
     This is is a so-called MonboDB middleware. It runs before create/update events.
