@@ -11,6 +11,14 @@ const taskRouter = require('./routers/task');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// app.use((req, res, next) => {
+//     if(process.env.UNDER_MAINTENANCE === 'true'){
+//         return res.status(503).send('Service is under maintenance. Please try again later.');
+//     }
+
+//     next();
+// });
+
 // parse incoming requests to json
 app.use(express.json());
 

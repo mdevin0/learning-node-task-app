@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         maxlength: 50,
         validate(value){
-            if(validator.isAlphanumeric(value)){
+            if(!validator.isAlphanumeric(value)){
                throw new Error("User name can only contain letters and numbers");
             }
         }
@@ -49,10 +50,28 @@ const userSchema = new mongoose.Schema({
                 throw new Error('Age is invalid')
             }
         }
-    }
+    },
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 });
 
+// Instance method
+userSchema.methods.generateAuthToken = async function() {
+    const user = this;
+    const token = jwt.sign({id: user._id.toString() }, process.env.JTW_SIGN, 
+            { expiresIn: process.env.JWT_TTL });
+    user.tokens.push({token});
+    await user.save();
 
+    return token;
+};
+
+
+// Static method
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
     if(!user)

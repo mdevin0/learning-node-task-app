@@ -1,6 +1,8 @@
 const express = require('express');
+
 const User = require('../model/user');
 const utils = require('../utils');
+const auth = require('../middleware/auth');
 
 const router = new express.Router();
 
@@ -10,28 +12,20 @@ router.post('/user', async (req, res) => {
     try {
         // TODO - should return status 500 if there's an error on connecting with the database
         await user.save();
-        res.status(201).send(user);
+        const token = await user.generateAuthToken();
+        res.status(201).send({user, token});
     } catch(e) {
         res.status(400).send(e);
     }
 });
 
-// list users
-router.get('/user/', async (req, res) => {
-    try {
-        const users = await User.find({});
-        if(!users){
-            return res.status(404).send({error: 'No users found.'});
-        }
-        res.send(users);
-
-    } catch(e) {
-        res.status(500).send(e);
-    }
+// show user profile
+router.get('/user/me', auth, async (req, res) => {
+    res.send(req.user);
 });
 
 // list specific user
-router.get('/user/:id', async (req, res) => {
+router.get('/user/:id', auth, async (req, res) => {
     const{id} = req.params;
 
     try{
@@ -46,7 +40,7 @@ router.get('/user/:id', async (req, res) => {
 });
 
 // update user
-router.patch('/user/:id', async (req, res) => {
+router.patch('/user/:id', auth, async (req, res) => {
     const fieldsToUpdate = Object.keys(req.body);
     const invalidFields = utils.getInvalidFields(fieldsToUpdate, User);
 
@@ -70,7 +64,7 @@ router.patch('/user/:id', async (req, res) => {
 });
 
 // delete user
-router.delete('/user/:id', async (req, res) => {
+router.delete('/user/:id', auth, async (req, res) => {
     const {id} = req.params;
 
     try {
@@ -84,12 +78,13 @@ router.delete('/user/:id', async (req, res) => {
     }
 });
 
-
+// user login
 router.post('/user/login', async (req, res) => {
     try {
         const {email, password} = req.body;
         const user = await User.findByCredentials(email, password);
-        res.send(user);
+        const token = await user.generateAuthToken();
+        res.send({user, token});
     } catch(e){
         res.status(400).send(e);
     }
