@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "env-cmd -f ./secret/dev.env node src/index.js",
+    "start": "node src/index.js",
+    "dev-no-debug": "env-cmd -f ./secret/dev.env node src/index.js",
     "dev": "env-cmd -f ./secret/dev.env nodemon src/index.js -e js,env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
