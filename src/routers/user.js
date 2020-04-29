@@ -100,7 +100,6 @@ router.delete('/user/me', auth, async (req, res) => {
 
 // user file upload
 const upload = multer({
-    dest: 'uploads',
     limits: {
         fileSize: 1000000 // 1MB
     },
@@ -112,11 +111,22 @@ const upload = multer({
         callback(undefined, true);
     }
 });
-router.post('/user/me/avatar', upload.single('avatar'), async (req, res) => {
-    console.log('File uploaded!');
+router.post('/user/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
     res.send({message: 'File uploaded successfully.'});
 
-}, (error, req, res, next) => { // It's important for the call to have this signature
+}, (error, req, res, next) => { // It's important for the function to have this signature
+    res.status(400).send({error: error.message});
+});
+
+
+router.delete('/user/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.send({message: 'File deleted successfully.'});
+
+}, (error, req, res, next) => { // It's important for the function to have this signature
     res.status(400).send({error: error.message});
 });
 
