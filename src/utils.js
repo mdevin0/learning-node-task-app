@@ -13,7 +13,7 @@ const getProperties = (model) => {
 }
 
 const validateEnvironmentVariables = () => {
-    const requiredVars = ['BCRYPT_ROUNDS', 'JWT_SIGN', 'JWT_TTL'];
+    const requiredVars = ['BCRYPT_ROUNDS', 'JWT_SIGN', 'JWT_TTL', 'SENDGRID_KEY', 'SENDGRID_FROM'];
     const envVars = Object.keys(process.env);
     const missingVars = requiredVars.filter((requiredVar) => !envVars.includes(requiredVar));
     if(missingVars.length > 0){

@@ -5,6 +5,7 @@ const sharp = require('sharp');
 const User = require('../model/user');
 const utils = require('../utils');
 const auth = require('../middleware/auth');
+const {sendWelcomeEmail, sendGoodbyeEmail} = require('../email/account');
 
 const router = new express.Router();
 
@@ -14,6 +15,7 @@ router.post('/user', async (req, res) => {
     try {
         // TODO - should return status 500 if there's an error on connecting with the database
         const token = await user.generateAuthToken();
+        sendWelcomeEmail(user.email, user.name);
         res.status(201).send({user, token});
     } catch(e) {
         console.error(e);
@@ -92,6 +94,7 @@ router.delete('/user/me', auth, async (req, res) => {
 
     try {
         await req.user.remove();
+        sendGoodbyeEmail(req.user.email, req.user.name);
         res.send(req.user);
     } catch(e){
         console.error(e);
