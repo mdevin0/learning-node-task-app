@@ -58,6 +58,8 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
 });
 
 // Sets up the relation to find tasks from User object

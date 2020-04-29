@@ -25,14 +25,29 @@ router.post('/task', auth, async (req, res) => {
 
 // list tasks
 router.get('/task/', auth, async (req, res) => {
+    const match = {};
+    const sort = {};
+
+    if(req.query.completed){
+        match.completed = req.query.completed === 'true';
+    }
+
+    if(req.query.sortBy){
+        const parts = req.query.sortBy.split(':');
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+    }
+
     try{
-        const tasks = await Task.find({owner: req.user._id});
-        // Another way to get all tasks of an user
-        // const tasks = await req.user.tasks.populate('tasks').execPopulate();;
-        if(!tasks){
-            return res.status(404).send({error:'No tasks found'});
-        }
-        res.send(tasks);
+        await req.user.populate({
+            path: 'tasks',
+            match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort
+            }
+        }).execPopulate();
+        res.send(req.user.tasks);
     } catch(e){
         console.error(e);
         res.status(500).send(e);
