@@ -18,7 +18,7 @@ const sendGoodbyeEmail = (email, name) => {
         to: email,
         from: process.env.SENDGRID_FROM,
         subject: 'Sad to see you go :(',
-        text: `Hi, ${name}. I heard you're leaving our app. I'm sorry if we didn't`
+        text: `Hi, ${name}. I heard you're leaving Task App. Thanks for being part of it. I hope to see you again.`
     });
 }
 
