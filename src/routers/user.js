@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 
 const User = require('../model/user');
 const utils = require('../utils');
@@ -95,6 +96,28 @@ router.delete('/user/me', auth, async (req, res) => {
         console.error(e);
         res.status(500).send({error: "Error deleting user."});
     }
+});
+
+// user file upload
+const upload = multer({
+    dest: 'uploads',
+    limits: {
+        fileSize: 1000000 // 1MB
+    },
+    fileFilter(req, file, callback){
+        if(!file.originalname.toLowerCase().match(/[.](jpe?g|png)$/)){
+            return callback(new Error('Only .jpg, .jpeg, and .png extensions are supported.'));
+        }
+
+        callback(undefined, true);
+    }
+});
+router.post('/user/me/avatar', upload.single('avatar'), async (req, res) => {
+    console.log('File uploaded!');
+    res.send({message: 'File uploaded successfully.'});
+
+}, (error, req, res, next) => { // It's important for the call to have this signature
+    res.status(400).send({error: error.message});
 });
 
 
