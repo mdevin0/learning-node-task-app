@@ -59,7 +59,12 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
-
+// Sets up the relation to find tasks from User object
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+});
 
 userSchema.methods.toJSON = function(){
     const user = this;
@@ -75,7 +80,7 @@ userSchema.methods.toJSON = function(){
 // Instance method
 userSchema.methods.generateAuthToken = async function() {
     const user = this;
-    const token = jwt.sign({id: user._id.toString() }, process.env.JWT_SIGN, 
+    const token = jwt.sign({_id: user._id.toString() }, process.env.JWT_SIGN, 
             { expiresIn: process.env.JWT_TTL });
     user.tokens.push({token});
     await user.save();
