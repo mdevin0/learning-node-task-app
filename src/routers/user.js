@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const sharp = require('sharp');
 
 const User = require('../model/user');
 const utils = require('../utils');
@@ -112,7 +113,8 @@ const upload = multer({
     }
 });
 router.post('/user/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-    req.user.avatar = req.file.buffer;
+    const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer();
+    req.user.avatar = buffer;
     await req.user.save();
     res.send({message: 'File uploaded successfully.'});
 
@@ -120,7 +122,7 @@ router.post('/user/me/avatar', auth, upload.single('avatar'), async (req, res) =
     res.status(400).send({error: error.message});
 });
 
-
+// delete user avatar
 router.delete('/user/me/avatar', auth, async (req, res) => {
     req.user.avatar = undefined;
     await req.user.save();
@@ -128,6 +130,23 @@ router.delete('/user/me/avatar', auth, async (req, res) => {
 
 }, (error, req, res, next) => { // It's important for the function to have this signature
     res.status(400).send({error: error.message});
+});
+
+// serve avatar
+router.get('/user/:_id/avatar', async (req, res) => {
+    try {
+        const user = await User.findById(req.params._id);
+        if(!user || !user.avatar){
+            throw new Error('Profile not found.');
+        }
+        res.set('Content-Type', 'image/png');
+        res.send(user.avatar);
+    } catch(e) {
+        res.status(404).send({error: e.message});
+    }
+
+}, (error, req, res, next) => { // It's important for the function to have this signature
+    res.status(404).send({error: error.message});
 });
 
 
