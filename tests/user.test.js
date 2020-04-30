@@ -158,3 +158,83 @@ describe('User deletion', () => {
         .expect(401);
     });
 });
+
+describe('User profile picture upload', () => {
+    test('Should upload profile picture', async () => {
+        await request(app)
+        .post('/user/me/avatar')
+        .set('Authorization', `Bearer ${existingUser.tokens[0].token}`)
+        .attach('avatar', 'tests/fixtures/profile-pic.jpg')
+        .expect(200);
+
+        // Assert user has been deleted, along with its tasks
+        const retrievedUser = await User.findById(existingUser._id);
+        expect(retrievedUser.avatar).toEqual(expect.any(Buffer));
+    });
+
+    test('Should not files from unauthorized user', async () => {
+        await request(app)
+        .post('/user/me/avatar')
+        .attach('avatar', 'tests/fixtures/fall.jpg')
+        .expect(401);
+    });
+
+    test('Should not upload unsuported extensions', async () => {
+        await request(app)
+        .post('/user/me/avatar')
+        .set('Authorization', `Bearer ${existingUser.tokens[0].token}`)
+        .attach('avatar', 'tests/fixtures/sample-pdf-file.pdf')
+        .expect(400);
+    });
+
+    test('Should not upload large files', async () => {
+        await request(app)
+        .post('/user/me/avatar')
+        .set('Authorization', `Bearer ${existingUser.tokens[0].token}`)
+        .attach('avatar', 'tests/fixtures/fall.jpg')
+        .expect(400);
+    });
+});
+
+describe('User update', () => {
+    test('Should update valid user fields', async () => {
+        await request(app)
+        .patch('/user/me/')
+        .set('Authorization', `Bearer ${existingUser.tokens[0].token}`)
+        .send({
+            name: 'AnotherName',
+            email: 'another@email.com',
+            age: 2
+        })
+        .expect(200);
+
+        // Assert user has been updated on the database
+        const retrievedUser = await User.findById(existingUser._id);
+        expect(retrievedUser.name).toBe('AnotherName');
+        expect(retrievedUser.email).toBe('another@email.com');
+        expect(retrievedUser.age).toBe(2);
+    });
+
+    test('Should not update invalid user fields', async () => {
+        await request(app)
+        .patch('/user/me/')
+        .set('Authorization', `Bearer ${existingUser.tokens[0].token}`)
+        .send({
+            name: 'AnotherName',
+            email: 'another@email.com',
+            job: 'Software developer'
+        })
+        .expect(400);
+    });
+
+    test('Should not update unauthorized user', async () => {
+        await request(app)
+        .patch('/user/me/')
+        .send({
+            name: 'AnotherName',
+            email: 'another@email.com',
+            age: 2
+        })
+        .expect(401);
+    });
+});
