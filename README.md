@@ -11,6 +11,8 @@ An app for task management. This is application is based on the Task App built i
 
 * You can overwrite the `toJSON()` method of an object if you want to hide data. This method is called by `JSON.stringify()`, which is widely used.
 
+* Jest's `expect.toMatchObject()` only tests for the given properties. It will ignore any other extra properties.
+
 ## To-dos
 
 * Properly handle request vs. server errors.
