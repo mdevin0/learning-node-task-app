@@ -103,6 +103,7 @@ router.delete('/task/:_id', auth, async (req, res) => {
         if(!task){
             return res.status(404).send({error: 'Task not found.'});
         }
+        await task.remove();
         res.send(task);
     } catch(e){
         console.error(e);

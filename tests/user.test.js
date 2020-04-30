@@ -1,51 +1,14 @@
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 
 const app = require('src/app');
+const {existingUser, unregisteredUser, validUser, setupDatabase, wipeDatabase} = require('tests/fixtures/db');
 const User = require('src/model/user');
 const Task = require('src/model/task');
 
 
-//////////////////// Data ////////////////////
 
-const existingUserId = new mongoose.Types.ObjectId();
-const existingUser = {
-    _id: existingUserId,
-    name: 'ExistingUser',
-    email: 'existing@user.com',
-    password: 'I am an existing user!',
-    tokens: [{
-        token: jwt.sign({ _id: existingUserId.toString() }, process.env.JWT_SIGN)
-    }]
-};
-
-const unregisteredUser = {
-    name: 'UnregisteredUser',
-    email: 'unregistered@user.com',
-    password: 'I am not signed up!'
-};
-
-const validUser = {
-    name: 'ValidUser',
-    email: 'valid@user.com',
-    password: 'I am a valid user!'
-};
-
-
-//////////////////// Setup and Teardown ////////////////////
-
-beforeEach(async () => {
-    await User.deleteMany();
-    await new User(existingUser).save();
-});
-
-afterAll(async () => {
-    await User.deleteMany();
-});
-
-
-//////////////////// Tests ////////////////////
+beforeEach(setupDatabase);
+afterAll(wipeDatabase);
 
 describe('User sign up', () => {
     test('Should sign up a new user', async () => {

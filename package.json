@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "devnomon": "env-cmd -f ./secret/dev.env node src/index.js",
     "dev": "env-cmd -f ./secret/dev.env nodemon src/index.js -e js,env",
-    "test": "env-cmd -f ./secret/dev.env jest --watch --runInBand --detectOpenHandles"
+    "test": "env-cmd -f ./secret/test.env jest --watch --runInBand --detectOpenHandles"
   },
   "jest": {
     "testEnvironment": "node",
